@@ -1,0 +1,247 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAuthorizedEmail(email) {
+      return email is string &&
+        email.size() <= 120 &&
+        email.lower() in [
+          'mr.mohamed.hesham93@gmail.com',
+          'mohammedhesham872@gmail.com'
+        ];
+    }
+
+    function isNormalizedAuthorizedEmail(email) {
+      return email is string &&
+        email in [
+          'mr.mohamed.hesham93@gmail.com',
+          'mohammedhesham872@gmail.com'
+        ];
+    }
+
+    function isAuthorizedHouseholdMember() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        isAuthorizedEmail(request.auth.token.email);
+    }
+
+    function isValidDateString(val) {
+      return val is string && val.size() == 10 && val.matches('^\\d{4}-\\d{2}-\\d{2}$');
+    }
+
+    function isValidMonthString(val) {
+      return val is string && val.size() == 7 && val.matches('^\\d{4}-\\d{2}$');
+    }
+
+    function isValidIncome(data) {
+      return data.keys().hasAll([
+          'title', 'source', 'amount', 'date', 'month', 'notes',
+          'createdByUid', 'createdByEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'title', 'source', 'amount', 'date', 'month', 'notes',
+          'createdByUid', 'createdByEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+        data.source is string && data.source.size() >= 1 && data.source.size() <= 80 &&
+        data.amount is number && data.amount > 0 && data.amount <= 100000000 &&
+        isValidDateString(data.date) &&
+        isValidMonthString(data.month) &&
+        data.notes is string && data.notes.size() <= 400 &&
+        data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128 &&
+        isNormalizedAuthorizedEmail(data.createdByEmail) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidExpense(data) {
+      return data.keys().hasAll([
+          'title', 'category', 'entryType', 'status', 'amount', 'date', 'month', 'notes',
+          'createdByUid', 'createdByEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'title', 'category', 'entryType', 'status', 'amount', 'date', 'month', 'notes',
+          'createdByUid', 'createdByEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+        data.category is string && data.category in [
+          'food', 'utilities', 'housing', 'transport', 'health',
+          'shopping', 'family', 'entertainment', 'other'
+        ] &&
+        data.entryType is string && data.entryType in ['daily', 'bill'] &&
+        data.status is string && data.status in ['paid', 'pending'] &&
+        data.amount is number && data.amount > 0 && data.amount <= 100000000 &&
+        isValidDateString(data.date) &&
+        isValidMonthString(data.month) &&
+        data.notes is string && data.notes.size() <= 400 &&
+        data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128 &&
+        isNormalizedAuthorizedEmail(data.createdByEmail) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidSaving(data) {
+      return data.keys().hasAll([
+          'title', 'goalName', 'kind', 'amount', 'date', 'month', 'notes',
+          'createdByUid', 'createdByEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'title', 'goalName', 'kind', 'amount', 'date', 'month', 'notes',
+          'createdByUid', 'createdByEmail', 'createdAt', 'updatedAt'
+        ]) &&
+        data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+        data.goalName is string && data.goalName.size() >= 1 && data.goalName.size() <= 80 &&
+        data.kind is string && data.kind in ['deposit', 'withdraw'] &&
+        data.amount is number && data.amount > 0 && data.amount <= 100000000 &&
+        isValidDateString(data.date) &&
+        isValidMonthString(data.month) &&
+        data.notes is string && data.notes.size() <= 400 &&
+        data.createdByUid is string && data.createdByUid.size() >= 1 && data.createdByUid.size() <= 128 &&
+        isNormalizedAuthorizedEmail(data.createdByEmail) &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidHouseholdSettings(data) {
+      return data.keys().hasAll([
+          'householdName', 'currency', 'monthlyBudgetLimit', 'monthlySavingsTarget',
+          'updatedByUid', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'householdName', 'currency', 'monthlyBudgetLimit', 'monthlySavingsTarget',
+          'updatedByUid', 'updatedAt'
+        ]) &&
+        data.householdName is string && data.householdName.size() >= 1 && data.householdName.size() <= 80 &&
+        data.currency is string && data.currency.size() >= 1 && data.currency.size() <= 12 &&
+        data.monthlyBudgetLimit is number && data.monthlyBudgetLimit >= 0 && data.monthlyBudgetLimit <= 100000000 &&
+        data.monthlySavingsTarget is number && data.monthlySavingsTarget >= 0 && data.monthlySavingsTarget <= 100000000 &&
+        data.updatedByUid is string && data.updatedByUid.size() >= 1 && data.updatedByUid.size() <= 128 &&
+        data.updatedAt is timestamp;
+    }
+
+    match /incomes/{incomeId} {
+      allow get: if isAuthorizedHouseholdMember() && isValidId(incomeId);
+      allow list: if isAuthorizedHouseholdMember() &&
+        resource.data.createdByEmail in [
+          'mr.mohamed.hesham93@gmail.com',
+          'mohammedhesham872@gmail.com'
+        ];
+      allow create: if isAuthorizedHouseholdMember() &&
+        isValidId(incomeId) &&
+        isValidIncome(incoming()) &&
+        incoming().createdByUid == request.auth.uid &&
+        incoming().createdByEmail == request.auth.token.email.lower() &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isAuthorizedHouseholdMember() &&
+        isValidId(incomeId) &&
+        isValidIncome(incoming()) &&
+        incoming().createdByUid == existing().createdByUid &&
+        incoming().createdByEmail == existing().createdByEmail &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'source', 'amount', 'date', 'month', 'notes', 'updatedAt'
+        ]);
+      allow delete: if isAuthorizedHouseholdMember() && isValidId(incomeId);
+    }
+
+    match /expenses/{expenseId} {
+      allow get: if isAuthorizedHouseholdMember() && isValidId(expenseId);
+      allow list: if isAuthorizedHouseholdMember() &&
+        resource.data.createdByEmail in [
+          'mr.mohamed.hesham93@gmail.com',
+          'mohammedhesham872@gmail.com'
+        ];
+      allow create: if isAuthorizedHouseholdMember() &&
+        isValidId(expenseId) &&
+        isValidExpense(incoming()) &&
+        incoming().createdByUid == request.auth.uid &&
+        incoming().createdByEmail == request.auth.token.email.lower() &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isAuthorizedHouseholdMember() &&
+        isValidId(expenseId) &&
+        isValidExpense(incoming()) &&
+        incoming().createdByUid == existing().createdByUid &&
+        incoming().createdByEmail == existing().createdByEmail &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'title', 'category', 'entryType', 'status', 'amount', 'date', 'month', 'notes', 'updatedAt'
+          ])
+        );
+      allow delete: if isAuthorizedHouseholdMember() && isValidId(expenseId);
+    }
+
+    match /savings/{savingId} {
+      allow get: if isAuthorizedHouseholdMember() && isValidId(savingId);
+      allow list: if isAuthorizedHouseholdMember() &&
+        resource.data.createdByEmail in [
+          'mr.mohamed.hesham93@gmail.com',
+          'mohammedhesham872@gmail.com'
+        ];
+      allow create: if isAuthorizedHouseholdMember() &&
+        isValidId(savingId) &&
+        isValidSaving(incoming()) &&
+        incoming().createdByUid == request.auth.uid &&
+        incoming().createdByEmail == request.auth.token.email.lower() &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+      allow update: if isAuthorizedHouseholdMember() &&
+        isValidId(savingId) &&
+        isValidSaving(incoming()) &&
+        incoming().createdByUid == existing().createdByUid &&
+        incoming().createdByEmail == existing().createdByEmail &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'title', 'goalName', 'kind', 'amount', 'date', 'month', 'notes', 'updatedAt'
+        ]);
+      allow delete: if isAuthorizedHouseholdMember() && isValidId(savingId);
+    }
+
+    match /householdSettings/{settingId} {
+      allow get: if isAuthorizedHouseholdMember() && isValidId(settingId);
+      allow list: if isAuthorizedHouseholdMember() &&
+        resource.data.currency is string;
+      allow create: if isAuthorizedHouseholdMember() &&
+        isValidId(settingId) &&
+        isValidHouseholdSettings(incoming()) &&
+        incoming().updatedByUid == request.auth.uid &&
+        incoming().updatedAt == request.time;
+      allow update: if isAuthorizedHouseholdMember() &&
+        isValidId(settingId) &&
+        isValidHouseholdSettings(incoming()) &&
+        incoming().updatedByUid == request.auth.uid &&
+        incoming().updatedAt == request.time &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'householdName', 'currency', 'monthlyBudgetLimit', 'monthlySavingsTarget',
+          'updatedByUid', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+  }
+}
