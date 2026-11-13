@@ -7,6 +7,7 @@ import {
   signOutUser,
 } from '../services/firebase';
 import { PWAInstallButton } from './PWAInstallButton';
+import logoImg from '../assets/logo.jpg';
 
 interface LoginPageProps {
   currentUser: User | null;
@@ -93,7 +94,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="absolute -inset-1.5 bg-gradient-to-tr from-emerald-500 via-teal-400 to-amber-400 rounded-full blur-md opacity-60 animate-pulse" />
               <div className="relative w-24 h-24 rounded-full p-1 bg-gradient-to-br from-emerald-500 via-teal-500 to-amber-400 shadow-xl overflow-hidden">
                 <img
-                  src="/logo.jpg"
+                  src={logoImg}
                   alt="شعار Bills Tracker"
                   className="w-full h-full object-cover rounded-full"
                 />

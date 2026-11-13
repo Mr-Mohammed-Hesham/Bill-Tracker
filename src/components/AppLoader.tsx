@@ -1,5 +1,6 @@
 import React from 'react';
 import { Cloud, Sparkles } from 'lucide-react';
+import logoImg from '../assets/logo.jpg';
 
 interface AppLoaderProps {
   message?: string;
@@ -25,7 +26,7 @@ export const AppLoader: React.FC<AppLoaderProps> = ({
           />
           <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full p-1 bg-gradient-to-br from-emerald-400 via-teal-500 to-amber-400 shadow-2xl shadow-emerald-500/25 overflow-hidden">
             <img
-              src="/logo.jpg"
+              src={logoImg}
               alt="Bills Tracker"
               className="w-full h-full object-cover rounded-full"
             />

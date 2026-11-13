@@ -55,6 +55,7 @@ import { ConfirmModal } from './components/ConfirmModal';
 import { ToastContainer, type ToastMessage } from './components/Toast';
 import { PWAInstallButton } from './components/PWAInstallButton';
 import { OfflineIndicator } from './components/OfflineIndicator';
+import logoImg from './assets/logo.jpg';
 
 type TabMode = 'dashboard' | 'expenses' | 'incomes' | 'savings';
 
@@ -390,7 +391,7 @@ function BillsTrackerApp() {
         <div className="space-y-7">
           <div className="flex items-center gap-3">
             <img
-              src="/logo.jpg"
+              src={logoImg}
               alt="Bills Tracker"
               className="w-11 h-11 rounded-full object-cover border-2 border-emerald-500/70 shrink-0 shadow-sm"
             />
@@ -466,7 +467,7 @@ function BillsTrackerApp() {
           {/* Zone 1: Brand / Section title */}
           <div className="flex items-center gap-2.5 min-w-0">
             <img
-              src="/logo.jpg"
+              src={logoImg}
               alt="Bills Tracker"
               className="w-9 h-9 rounded-full object-cover border-2 border-emerald-500/70 lg:hidden shrink-0"
             />
