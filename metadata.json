@@ -1,0 +1,6 @@
+{
+  "name": "Bills Tracker",
+  "description": "تطبيق Bills Tracker لتسجيل المصروفات اليومية والفواتير والدخل الشهري والمتبقي والتوفير المنزلي عبر السحابة",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
